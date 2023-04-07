@@ -1,38 +1,52 @@
 use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
+
 #[derive(Component)]
-struct Person;
-#[derive(Component)]
-struct Name(String);
-fn add_people(mut commands: Commands) {
-    commands.spawn((Person, Name("Elaina Proctor".to_string())));
-    commands.spawn((Person, Name("Renzo Hume".to_string())));
-    commands.spawn((Person, Name("Zayna Nieves".to_string())));
+struct Player {
+    pub name: String,
+    //x y z position
+    x : f32,
+    y : f32,
+    z : f32,
 }
-#[derive(Resource)]
-struct GreetTimer(Timer);
-fn greet_people(
-    time: Res<Time>, mut timer: ResMut<GreetTimer>, query: Query<&Name, With<Person>>) {
-    // update our timer with the time elapsed since the last update
-    // if that caused the timer to finish, we say hello to everyone
-    if timer.0.tick(time.delta()).just_finished() {
-        for name in &query {
-            println!("hello {}!", name.0);
-        }
-    }
+
+fn spawn_player(
+    mut commands: Commands, asset_server: Res<AssetServer>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    ){
+    let window = window_query.get_single().unwrap();
+    let player = Player{
+        name: "Player_1".to_string(),
+        x: window.width() as f32 / 2.0,
+        y: window.height() as f32 / 2.0,
+        z: 0.0,
+    };
+    commands.spawn((
+        SpriteBundle {
+            transform: Transform:: from_xyz(player.x, player.y, player.z),
+            texture: asset_server.load("set3/PNG/Retina/ball_blue_large.png"),
+            ..default()
+        },
+        player,
+    ));
+    println!("Player spawned ");
 }
-pub struct HelloPlugin;
-impl Plugin for HelloPlugin {
-    fn build(&self, app: &mut App) {
-        app.insert_resource(GreetTimer(Timer::from_seconds(2.0, TimerMode::Repeating)))
-            .add_startup_system(add_people)
-            .add_system(greet_people);
-    }
+
+pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<PrimaryWindow>>){
+    let window = window_query.get_single().unwrap();
+    commands.spawn(
+        Camera2dBundle{
+            transform: Transform::from_xyz(window.width()/2.0, window.height()/2.0, 0.0),
+            ..default()}
+    );
+    println!("Camera spawned");
 }
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(HelloPlugin)
+        .add_startup_system(spawn_camera)
+        .add_startup_system(spawn_player)
         .run();
 }
 
