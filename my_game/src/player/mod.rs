@@ -14,10 +14,3 @@ impl Plugin for PlayerPlugin {
         .add_system(confine_player_to_screen);
     }
 }
-
-
-// //    fn build(&self, app: &mut AppBuilder) {
-//     app.add_startup_system(spawn_player)
-//     .add_system(player_movement)
-//     .add_system(confine_player_to_screen);
-// }
